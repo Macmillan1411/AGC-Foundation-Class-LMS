@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AGC Foundation Class API Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"></script>
+    <style> body { margin: 0; padding: 0; } </style>
+  </head>
+  <body>
+    <div id="redoc-container"></div>
+    <script>
+      const spec = {
+        "openapi": "3.0.3",
+        "info": {
+          "title": "AGC Foundation Class Learning Platform API",
+          "version": "1.0.0",
+          "description": "API for the AGC foundation class video and quiz platform MVP."
+        },
+        "servers": [{ "url": "http://localhost:5500", "description": "Local development server" }],
+        "tags": [
+          { "name": "Auth", "description": "User authentication" },
+          { "name": "Videos", "description": "Video management and retrieval" },
+          { "name": "Quizzes", "description": "Quizzes linked to videos" },
+          { "name": "Progress", "description": "User progress tracking" }
+        ],
+        "components": {
+          "securitySchemes": {
+            "BearerAuth": {
+              "type": "http",
+              "scheme": "bearer",
+              "bearerFormat": "JWT"
+            }
+          },
+          "schemas": {
+            "RegisterRequest": {
+              "type": "object",
+              "required": ["username", "password"],
+              "properties": {
+                "username": { "type": "string", "example": "student1" },
+                "password": { "type": "string", "example": "yourpassword" }
+              }
+            },
+            "LoginRequest": {
+              "type": "object",
+              "required": ["username", "password"],
+              "properties": {
+                "username": { "type": "string", "example": "student1" },
+                "password": { "type": "string", "example": "yourpassword" }
+              }
+            },
+            "LoginResponse": {
+              "type": "object",
+              "properties": {
+                "access_token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+                "token_type": { "type": "string", "example": "bearer" }
+              }
+            },
+            "MessageResponse": {
+              "type": "object",
+              "properties": { "message": { "type": "string", "example": "User registered" } }
+            },
+            "Video": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "example": 1 },
+                "title": { "type": "string", "example": "Introduction to Faith" },
+                "description": { "type": "string", "example": "Welcome to our foundation class" },
+                "video_url": { "type": "string", "example": "https://www.youtube.com/embed/abc123XYZ" },
+                "order_index": { "type": "integer", "example": 1 }
+              }
+            },
+            "NewVideoRequest": {
+              "type": "object",
+              "required": ["title", "video_url", "order_index"],
+              "properties": {
+                "title": { "type": "string", "example": "Prayer and Worship" },
+                "description": { "type": "string", "example": "Learn about prayer" },
+                "video_url": { "type": "string", "example": "https://www.youtube.com/embed/ghi789RST" },
+                "order_index": { "type": "integer", "example": 3 }
+              }
+            },
+            "QuizOption": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "example": 1001 },
+                "option_text": { "type": "string", "example": "God the Father" }
+              }
+            },
+            "QuizQuestion": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "example": 101 },
+                "question_text": { "type": "string", "example": "Who is the Father in the Trinity?" },
+                "options": { "type": "array", "items": { "$ref": "#/components/schemas/QuizOption" } }
+              }
+            },
+            "QuizSubmitRequest": {
+              "type": "object",
+              "required": ["answers"],
+              "properties": {
+                "answers": {
+                  "type": "array",
+                  "items": { "type": "integer" },
+                  "example": [1001]
+                }
+              }
+            },
+            "QuizSubmitResponse": {
+              "type": "object",
+              "properties": {
+                "score": { "type": "integer", "example": 100 },
+                "is_passed": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Quiz passed. Next video unlocked!" }
+              }
+            },
+            "ProgressResponse": {
+              "type": "object",
+              "properties": {
+                "completed_quizzes": { "type": "array", "items": { "type": "integer" }, "example": [101, 102] },
+                "unlocked_videos": { "type": "array", "items": { "type": "integer" }, "example": [1, 2, 3] }
+              }
+            }
+          }
+        },
+        "paths": {
+          "/auth/register": {
+            "post": {
+              "tags": ["Auth"],
+              "summary": "Register a new user",
+              "requestBody": {
+                "required": true,
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RegisterRequest" } } }
+              },
+              "responses": {
+                "200": {
+                  "description": "User registered successfully",
+                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } } }
+                }
+              }
+            }
+          },
+          "/auth/login": {
+            "post": {
+              "tags": ["Auth"],
+              "summary": "Login and get JWT token",
+              "requestBody": {
+                "required": true,
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } }
+              },
+              "responses": {
+                "200": {
+                  "description": "Login successful",
+                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } }
+                }
+              }
+            }
+          },
+          "/videos": {
+            "get": {
+              "tags": ["Videos"],
+              "summary": "Get accessible videos for logged-in user",
+              "security": [{ "BearerAuth": [] }],
+              "responses": {
+                "200": {
+                  "description": "List of videos",
+                  "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Video" } } } }
+                }
+              }
+            },
+            "post": {
+              "tags": ["Videos"],
+              "summary": "Create a new video (admin only)",
+              "security": [{ "BearerAuth": [] }],
+              "requestBody": {
+                "required": true,
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NewVideoRequest" } } }
+              },
+              "responses": {
+                "200": {
+                  "description": "Video created successfully",
+                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Video" } } }
+                }
+              }
+            }
+          },
+          "/quizzes": {
+            "get": {
+              "tags": ["Quizzes"],
+              "summary": "Get quizzes for a video",
+              "security": [{ "BearerAuth": [] }],
+              "parameters": [
+                {
+                  "in": "query",
+                  "name": "video_id",
+                  "schema": { "type": "integer" },
+                  "required": true,
+                  "description": "Video ID to get quizzes for"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "List of quizzes for video",
+                  "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/QuizQuestion" } } } }
+                }
+              }
+            }
+          },
+          "/quizzes/{quiz_id}": {
+            "post": {
+              "tags": ["Quizzes"],
+              "summary": "Submit quiz answers",
+              "security": [{ "BearerAuth": [] }],
+              "parameters": [
+                {
+                  "in": "path",
+                  "name": "quiz_id",
+                  "schema": { "type": "integer" },
+                  "required": true,
+                  "description": "Quiz ID to submit answers for"
+                }
+              ],
+              "requestBody": {
+                "required": true,
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizSubmitRequest" } } }
+              },
+              "responses": {
+                "200": {
+                  "description": "Quiz result",
+                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizSubmitResponse" } } }
+                }
+              }
+            }
+          },
+          "/progress": {
+            "get": {
+              "tags": ["Progress"],
+              "summary": "Get user's progress",
+              "security": [{ "BearerAuth": [] }],
+              "responses": {
+                "200": {
+                  "description": "User progress data",
+                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProgressResponse" } } }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      // Render with ReDoc
+      Redoc.init(spec, {}, document.getElementById('redoc-container'));
+    </script>
+  </body>
+</html>
