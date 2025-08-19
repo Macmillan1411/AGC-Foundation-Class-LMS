@@ -13,7 +13,7 @@ from alembic import context
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 from app.db.base import Base
-from app.db.models import videos  # Import your models here
+from app.db.models import users, users  # Import your models here
 from app.core.config import settings
 
 # this is the Alembic Config object, which provides
