@@ -8,4 +8,4 @@ class UserCreateSchema(UserSchema):
     password: str = Field(..., min_length=8, example="strongpassword123")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

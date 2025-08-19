@@ -39,3 +39,10 @@ async def login_user(user_data: UserCreateSchema, session: AsyncSession = Depend
     access_token = create_access_token(token_data)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@auth_router.get("/me", response_model=UserSchema)
+async def get_me(current_user: UserSchema = Depends(get_session)):
+    """Return the currently authenticated user's profile."""
+    return current_user
+
