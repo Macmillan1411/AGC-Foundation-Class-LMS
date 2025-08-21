@@ -35,3 +35,36 @@ class UserService:
         await session.commit()
 
         return new_user
+    
+    async def delete_user(self, email: str, session: AsyncSession):
+        user = await self.get_user_by_email(email, session)
+
+        if not user:
+            return None
+
+        await session.delete(user)
+        await session.commit()
+
+        return user
+    
+    async def set_admin_status(self, email: str, is_admin: bool, session: AsyncSession):
+        user = await self.get_user_by_email(email, session)
+
+        if not user:
+            return None
+
+        user.is_admin = is_admin
+
+        session.add(user)
+        await session.commit()
+
+        return user
+
+    async def get_all_users(self, session: AsyncSession):
+        statement = select(User)
+
+        result = await session.execute(statement)
+
+        users = result.scalars().all()
+
+        return users

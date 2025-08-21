@@ -9,3 +9,10 @@ class UserSchema(BaseModel):
 
 class UserCreateSchema(UserSchema):
     password: str = Field(..., min_length=8, example="strongpassword123")
+
+
+class UserUpdateSchema(UserSchema):
+    is_admin: Optional[bool] = Field(None, example=True)
+
+    class Config:
+        from_attributes = True

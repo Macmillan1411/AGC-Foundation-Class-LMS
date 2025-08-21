@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.user_service import UserService
-from app.schemas.user import UserCreateSchema, UserSchema
+from app.schemas.user import UserCreateSchema, UserSchema, UserUpdateSchema
 from app.core.security import create_access_token, verify_password
 from app.db.session import get_session
 from app.core.deps import get_current_user, get_admin_user
@@ -51,9 +51,36 @@ async def get_me(current_user: UserSchema = Depends(get_current_user)):
     )
 
 
-@auth_router.get("/admin", response_model=UserSchema)
-async def get_admin_user(current_user: UserSchema = Depends(get_admin_user)):
-    """Return the admin user profile if the current user is an admin."""
+# @auth_router.get("/admin", response_model=UserSchema)
+# async def get_admin_user(current_user: UserSchema = Depends(get_admin_user)):
+#     """Return the admin user profile if the current user is an admin."""
+#     return UserSchema(
+#         email=current_user.email,
+#     )
+
+
+@auth_router.post("/admin/set_admin_status", response_model=UserUpdateSchema)
+async def set_admin_status(email: str, is_admin: bool, current_user: UserSchema = Depends(get_admin_user), session: AsyncSession = Depends(get_session)):
+    """Set a user's admin status."""
+    user = await user_service.set_admin_status(email, is_admin, session)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return UserUpdateSchema(
+        email=user.email,
+        is_admin=user.is_admin
+    )
+
+@auth_router.delete("/admin/delete", response_model=UserSchema)
+async def delete_user(email: str, current_user: UserSchema = Depends(get_admin_user), session: AsyncSession = Depends(get_session)):
+    """Delete a user."""
+    user = await user_service.delete_user(email, session)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     return UserSchema(
-        email=current_user.email,
+        email=user.email,
+        is_admin=user.is_admin
     )

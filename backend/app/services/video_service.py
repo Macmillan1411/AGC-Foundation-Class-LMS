@@ -18,3 +18,29 @@ class VideoService:
         result = await session.execute(query)
         video = result.scalar_one_or_none()
         return VideoSchema.model_validate(video) if video else None
+    
+    async def create_video(self, video_data: VideoSchema, session: AsyncSession) -> VideoSchema:
+        new_video = Video(**video_data.model_dump())
+        session.add(new_video)
+        await session.commit()
+        await session.refresh(new_video)
+        return VideoSchema.model_validate(new_video)
+    
+    async def delete_video(self, video_id: int, session: AsyncSession) -> Optional[VideoSchema]:
+        video = await self.get_video_by_id(video_id, session)
+        if not video:
+            return None
+        await session.delete(video)
+        await session.commit()
+        return video
+    
+    async def update_video(self, video_id: int, video_data: VideoSchema, session: AsyncSession) -> Optional[VideoSchema]:
+        video = await self.get_video_by_id(video_id, session)
+        if not video:
+            return None
+        for key, value in video_data.model_dump().items():
+            setattr(video, key, value)
+        session.add(video)
+        await session.commit()
+        await session.refresh(video)
+        return VideoSchema.model_validate(video)

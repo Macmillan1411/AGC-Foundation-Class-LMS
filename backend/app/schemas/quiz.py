@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class QuizOptionSchema(BaseModel):
-    id: int
+    id: Optional[int] = None
     option_text: str
 
     class Config:
@@ -10,7 +10,7 @@ class QuizOptionSchema(BaseModel):
 
 
 class QuizQuestionSchema(BaseModel):
-    id: int
+    id: Optional[int] = None
     question_text: str
     options: List[QuizOptionSchema]
 
