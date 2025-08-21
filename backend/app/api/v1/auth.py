@@ -4,6 +4,7 @@ from app.services.user_service import UserService
 from app.schemas.user import UserCreateSchema, UserSchema
 from app.core.security import create_access_token, verify_password
 from app.db.session import get_session
+from app.core.deps import get_current_user, get_admin_user
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -42,7 +43,17 @@ async def login_user(user_data: UserCreateSchema, session: AsyncSession = Depend
 
 
 @auth_router.get("/me", response_model=UserSchema)
-async def get_me(current_user: UserSchema = Depends(get_session)):
+async def get_me(current_user: UserSchema = Depends(get_current_user)):
     """Return the currently authenticated user's profile."""
-    return current_user
+    return UserSchema(
+        email=current_user.email,
+        is_admin=current_user.is_admin
+    )
 
+
+@auth_router.get("/admin", response_model=UserSchema)
+async def get_admin_user(current_user: UserSchema = Depends(get_admin_user)):
+    """Return the admin user profile if the current user is an admin."""
+    return UserSchema(
+        email=current_user.email,
+    )
