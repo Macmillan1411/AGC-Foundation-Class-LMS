@@ -11,7 +11,7 @@ class VideoService:
         query = select(Video).where(Video.published == 1).order_by(desc(Video.order))
         result = await session.execute(query)
         videos = result.scalars().all()
-        return [VideoSchema.model_vlidate(video) for video in videos]
+        return [VideoSchema.model_validate(video) for video in videos]
 
     async def get_video_by_id(self, video_id: int, session: AsyncSession) -> Optional[VideoSchema]:
         query = select(Video).where(Video.id == video_id)

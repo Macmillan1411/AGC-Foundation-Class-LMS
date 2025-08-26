@@ -39,7 +39,7 @@ async def login_user(user_data: UserCreateSchema, session: AsyncSession = Depend
     
     access_token = create_access_token(token_data)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token}
 
 
 @auth_router.get("/me", response_model=UserSchema)
@@ -49,14 +49,6 @@ async def get_me(current_user: UserSchema = Depends(get_current_user)):
         email=current_user.email,
         is_admin=current_user.is_admin
     )
-
-
-# @auth_router.get("/admin", response_model=UserSchema)
-# async def get_admin_user(current_user: UserSchema = Depends(get_admin_user)):
-#     """Return the admin user profile if the current user is an admin."""
-#     return UserSchema(
-#         email=current_user.email,
-#     )
 
 
 @auth_router.post("/admin/set_admin_status", response_model=UserUpdateSchema)
